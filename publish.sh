@@ -16,5 +16,5 @@ fi
 npm version patch -m "release %s"
 git push
 
-npm publish
+npm publish --access=public
 
