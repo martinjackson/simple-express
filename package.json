@@ -1,6 +1,6 @@
 {
   "name": "@martinjackson/simple-express",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "",
   "main": "appServer.js",
   "scripts": {
