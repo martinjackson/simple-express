@@ -188,4 +188,4 @@ function responseFile(filePath, response) {
 
 
 
-module.exports = { easy, create, serve, atomicSave, responseFile }
+module.exports = { serve, atomicSave, responseFile }
