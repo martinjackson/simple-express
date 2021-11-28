@@ -4,7 +4,7 @@ const path = require('path');
 const os = require('os');
 const { exit } = require('process');
 
-export const genSSLOptions = (fqdn) => {
+const genSSLOptions = (fqdn) => {
 
     let sslOptions = {
         secureProtocol:'TLSv1_2_method',
@@ -48,3 +48,4 @@ export const genSSLOptions = (fqdn) => {
     return sslOptions
 }
 
+module.exports = { genSSLOptions }
