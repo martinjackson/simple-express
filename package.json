@@ -1,6 +1,6 @@
 {
-  "name": "@nctr/appserver",
-  "version": "1.0.19",
+  "name": "simple-express",
+  "version": "1.0.20",
   "description": "",
   "main": "appServer.js",
   "scripts": {
@@ -10,12 +10,7 @@
   },
   "repository": {
     "type": "https",
-    "url": "https://ncsvmgitlab.fda.gov/nctr/appserver.git"
-  },
-  "publishConfig": {
-    "@nctr:registry": "https://ncsvmgitlab.fda.gov/api/v4/projects/336/packages/npm/",
-    "tag": "latest",
-    "cache": "~/.npm"
+    "url": "https://github.com/martinjackson/simple-express.git"
   },
   "author": "Martin A. Jackson",
   "license": "ISC",

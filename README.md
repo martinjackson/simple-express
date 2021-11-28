@@ -1,5 +1,8 @@
 ## How to Use:
 
+-----------------------------
+
+### server.js
 ```js
 /* eslint-disable object-shorthand */
 /* eslint-disable no-multi-spaces */
@@ -16,7 +19,7 @@ appServer.serve(apiRoutes, envPath)
 // use ./start.sh or ./test.sh to start (easier to stop later)
 ```
 
-apiRoutes.js
+### apiRoutes.js
 ```js
 
 let fs = require('fs');
