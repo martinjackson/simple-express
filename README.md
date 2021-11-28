@@ -1,15 +1,14 @@
 ## How to Use:
 
------------------------------
-
 ### server.js
+-----------------------------
 ```js
 /* eslint-disable object-shorthand */
 /* eslint-disable no-multi-spaces */
 /* eslint-disable indent */
 
 const path = require('path')
-const appServer = require('simple-express');
+const appServer = require('@martinjackson/simple-express');
 const apiRoutes = require('./apiRoutes.js');
 
 const envPath = path.resolve(__dirname, '../.env')
@@ -20,6 +19,7 @@ appServer.serve(apiRoutes, envPath)
 ```
 
 ### apiRoutes.js
+-----------------------------
 ```js
 
 let fs = require('fs');
