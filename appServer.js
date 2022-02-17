@@ -147,7 +147,17 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
     }
 
     debug(server, port);
-    server.listen(port);
+    server.listen(port, function(err){
+      if (err) {
+        console.log("Error in server setup")
+        console.log('Err:', err);
+      } else {
+        console.log("Server listening on Port", PORT);
+      }
+      console.log('');
+      console.log('');
+      console.log('');         // some terminal prompts need <CR> after last output
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
