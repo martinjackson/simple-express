@@ -152,7 +152,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
         console.log("Error in server setup")
         console.log('Err:', err);
       } else {
-        console.log("Server listening on Port", PORT);
+        console.log("Server listening on Port", port);
       }
       console.log('');
       console.log('');
