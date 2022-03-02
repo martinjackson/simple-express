@@ -153,7 +153,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
     // on stdout for vscode (before redirected to log file),
     // so vscode will detecct and auto-setup ssh redirect
     // from remote ssh to localhost
-    console.log(`Starting ${protocol}://${hostname}:${port} \n\n`)
+    console.log(`Starting ${protocol}://${hostname}:${port}', process.pid,'\n\n`)
 
     if (logFileName !== null) {
       log(logFileName)
