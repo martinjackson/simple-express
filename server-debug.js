@@ -14,13 +14,13 @@ function debug(server, port) {
   }
 
 
-  function showListening(server) {
+  function showListening(server, msg) {
     var addr = server.address();
     const host = os.hostname();
     const ip = getIP();
 
     var desc = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
-    console.log (host+" Listening on " + ip + " " + desc);
+    console.log (host+" "+msg+" on " + ip + " " + desc);
   }
 
 
@@ -53,8 +53,9 @@ function debug(server, port) {
     }
   });
 
-  server.on("listening", () => {showListening(server)} );
-  server.on("ready", () => {showListening(server)} );
+  console.log('--------------------------------------------------------------------------------');
+  server.on("listening", () => {showListening(server, "Listening")} );
+  server.on("ready",     () => {showListening(server, "Ready")} );
 }
 
 module.exports = debug;

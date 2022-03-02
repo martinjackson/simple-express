@@ -74,6 +74,16 @@ function serve(makeRouter, dotEnvPath) {
 
     app.use(logResponseTime);          // put each request's response time in the log file
 
+    /*
+    if (!argv.nomonitor) {
+      // npm install express-status-monitor --save
+      const statusMonitor = require('express-status-monitor')();
+
+      app.use(statusMonitor);
+      app.get('/status', statusMonitor.pageRoute)
+    }
+    */
+
     // make req.sessionID and req.session.id available
     app.use(session({
       secret: crypto.randomBytes(20).toString("hex"),      // every server restart -- all previous cookies are invalid
@@ -119,12 +129,15 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
     let protocol
     let server
     let sslOptions = null
+    let hostname = 'localhost'
+
     if (!httpsFlag) {
        server = http.createServer(app)
        protocol = 'http'
     } else {
       const {genSSLOptions} = require('./sslOptions.js');
        sslOptions = genSSLOptions(fqdn)
+       hostname = options.fqdn
        server = https.createServer(sslOptions, app);
        protocol = 'https'
     }
@@ -132,7 +145,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
     // on stdout for vscode (before redirected to log file),
     // so vscode will detecct and auto-setup ssh redirect
     // from remote ssh to localhost
-    console.log(`Starting ${protocol}://localhost:${port}`)
+    console.log(`Starting ${protocol}://${hostname}:${port} \n\n`)
 
     if (logFileName !== null) {
       log(logFileName)
@@ -140,7 +153,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
 
     console.log('argv:', process.argv);
     console.log('API_PORT:', port);
-    console.log(`${protocol}://localhost:${port}`)   // goes to log file
+    console.log(`${protocol}://${hostname}:${port}`)   // goes to log file
 
     if (sslOptions && sslOptions.startupMessage) {
       sslOptions.startupMessage.map(line => console.log(line))
