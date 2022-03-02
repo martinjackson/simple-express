@@ -14,6 +14,7 @@ const session = require('express-session')
 const dotenv = require('dotenv');
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
+const getFQDN = require('get-fqdn');
 
 const debug = require('./server-debug.js');
 const log = require('./server-log.js');
@@ -32,6 +33,14 @@ function serve(makeRouter, dotEnvPath) {
       throw result.error
     }
 
+    if (!process.env.FQDN) {
+      try {
+        process.env.FQDN = await getFQDN();
+      } catch (err) {
+        console.error('get-fqdn error:', err);
+      }
+    }
+
     const argv = yargs(hideBin(process.argv))
         .option('port', {
           alias: 'p',
@@ -41,7 +50,7 @@ function serve(makeRouter, dotEnvPath) {
         })
         .option('fqdn', {
           description: 'fully qualified domain name',
-          default: process.env.FQDN || os.hostname()
+          default: process.env.FQDN
         })
         .option('http', {
           type: 'boolean',
@@ -129,7 +138,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
     let protocol
     let server
     let sslOptions = null
-    let hostname = 'localhost'
+    let hostname = (fqdn) ? fqdn : 'localhost'
 
     if (!httpsFlag) {
        server = http.createServer(app)
@@ -137,7 +146,6 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
     } else {
       const {genSSLOptions} = require('./sslOptions.js');
        sslOptions = genSSLOptions(fqdn)
-       hostname = options.fqdn
        server = https.createServer(sslOptions, app);
        protocol = 'https'
     }
@@ -159,7 +167,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
       sslOptions.startupMessage.map(line => console.log(line))
     }
 
-    debug(server, port);
+    debug(server, port, hostname);
     server.listen(port, function(err) {
       if (err) {
         console.log("Error in server setup")

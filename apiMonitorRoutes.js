@@ -12,6 +12,7 @@ const addMonitorRoutes = (router) => {
             cpus:     os.cpus(),
             homedir:  os.homedir(),
             hostname: os.hostname(),
+            fqdn:     process.env.FQDN,
             platform: os.platform(),
             release:  os.release(),
           }
