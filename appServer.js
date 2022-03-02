@@ -24,7 +24,7 @@ const addMonitorRoutes = require('./apiMonitorRoutes.js');
 
 
 // -----------------------------------------------------------------------------------------------
-function serve(makeRouter, dotEnvPath) {
+const serve = async (makeRouter, dotEnvPath) => {
 
     console.log('dotenv: ', dotEnvPath);
     const result = dotenv.config({ path: dotEnvPath })
