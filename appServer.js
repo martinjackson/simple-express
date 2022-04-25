@@ -100,8 +100,9 @@ const serve = async (makeRouter, dotEnvPath) => {
       saveUninitialized: true
     }))
 
-    app.use(express.json())                          // for parsing application/json
-    app.use(express.urlencoded({ extended: true }))  // for parsing application/x-www-form-urlencoded
+    const limit = '50mb'      // defailt is 1mb
+    app.use(express.json({limit}))                          // for parsing application/json
+    app.use(express.urlencoded({ limit, extended: true }))  // for parsing application/x-www-form-urlencoded
     app.use(cors());
     app.use(cookieParser())
 
