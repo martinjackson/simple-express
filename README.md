@@ -3,19 +3,25 @@
 ### server.js
 -----------------------------
 ```js
-/* eslint-disable object-shorthand */
-/* eslint-disable no-multi-spaces */
-/* eslint-disable indent */
 
-const path = require('path')
-const appServer = require('@martinjackson/simple-express');
-const apiRoutes = require('./apiRoutes.js');
+import serviceRunning from 'service-already-running'
+import { serve } from '@martinjackson/simple-express'
 
-const envPath = path.resolve(__dirname, '../.env')
-appServer.serve(apiRoutes, envPath)
+import apiRoutes from './apiRoutes.js'
 
-// run with --help for all thhe options
-// use ./start.sh or ./test.sh to start (easier to stop later)
+const run = async () => {
+    console.log('\n-------------------------------------------------------');
+    // await serviceRunning.listAll();
+    await serviceRunning.killOthers();
+
+    serve(apiRoutes, '../.env')
+
+    // run with --help for all the options
+    // use ./start.sh or ./test.sh to start (easier to stop later)}
+}
+
+run()
+
 ```
 
 ### apiRoutes.js
