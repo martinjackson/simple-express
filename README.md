@@ -92,3 +92,8 @@ module.exports = makeRouter;
 6.  --fqdn {fully qualified server name}
 
     Pass in the *desired* fully qualified server name.  The default is to use the username --fqdn to ask the OS for the FQDN.
+    
+7.  --help
+
+    Display this list of options, showing the default values.
+    
