@@ -160,7 +160,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
       log(logFileName)
     }
 
-    console.log('argv:', process.argv);
+    // console.log('argv:', process.argv);
     console.log('API_PORT:', port);
     console.log(`${protocol}://${hostname}:${port}`)   // goes to log file
 
