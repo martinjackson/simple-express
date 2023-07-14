@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "http test",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "./server.js",
+            "cwd": "${workspaceFolder}/test/",
+
+            // "args": ["--arg1", "value1", "--arg2", "value2"],
+            "args": ["--http", "--public", "./public/", "--fqdn", "streamof.info", "SIMPLE_EXPRESS_TEST"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "https test",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "./server.js",
+            "cwd": "${workspaceFolder}/test/",
+
+            // "args": ["--arg1", "value1", "--arg2", "value2"],
+            "args": ["--https", "--public", "./public/", "--fqdn", "streamof.info", "SIMPLE_EXPRESS_TEST"]
+        }
+    ]
+}

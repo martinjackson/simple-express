@@ -4,4 +4,4 @@
 const { serve } = require('../appServer.js')
 const apiRoutes = require('./apiRoutes.js')
 
-serve(apiRoutes, '../.env')
+serve(apiRoutes, './.env')

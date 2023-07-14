@@ -10,17 +10,26 @@ const genSSLOptions = (fqdn) => {
    // taken from io.js' TLS docs
    // https://iojs.org/api/tls.html
 
-   var defCiphers = tls.getCiphers()
-   console.log('default ciphers:', defCiphers)    // ['AES128-SHA', 'AES256-SHA', ...]
-
   const ciphers = [
-    "ECDHE-RSA-AES256-SHA384",
     "DHE-RSA-AES256-SHA384",
-    "ECDHE-RSA-AES256-SHA256",
     "DHE-RSA-AES256-SHA256",
-    "ECDHE-RSA-AES128-SHA256",
     "DHE-RSA-AES128-SHA256",
+
+    "ECDHE-ECDSA-AES128-GCM-SHA256",
+    "ECDHE-ECDSA-AES256-GCM-SHA384",
+    "ECDHE-ECDSA-AES128-SHA",
+    "ECDHE-ECDSA-AES256-SHA",
+    "ECDHE-ECDSA-AES128-SHA256",
+    "ECDHE-ECDSA-AES256-SHA384",
+
     "HIGH",
+
+    "!CBC",
+    "!RSA",
+
+    "!ECDHE-RSA-AES256-SHA384",    // WEAK
+    "!ECDHE-RSA-AES256-SHA256",    // WEAK
+    "!ECDHE-RSA-AES128-SHA256",    // WEAK
     "!aNULL",
     "!eNULL",
     "!EXPORT",
@@ -32,7 +41,19 @@ const genSSLOptions = (fqdn) => {
     "!CAMELLIA"
 ].join(':')
 
-    console.log('setting ciphers:', ciphers) // ['AES128-SHA', 'AES256-SHA', ...]
+/*
+
+Cipher Suites
+# TLS 1.2 (suites in server-preferred order)
+
+TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384       (0xc030)   ECDH x25519 (eq. 3072 bits RSA)   FS	256
+TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 (0xcca8)   ECDH x25519 (eq. 3072 bits RSA)   FS	256
+TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384      (0xc061)   ECDH x25519 (eq. 3072 bits RSA)   FS	256
+TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256       (0xc02f)   ECDH x25519 (eq. 3072 bits RSA)   FS	128
+TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256      (0xc060)   ECDH x25519 (eq. 3072 bits RSA)   FS	128
+
+at https://www.ssllabs.com/ssltest/analyze.html
+*/
 
     let sslOptions = {
         secureProtocol:'TLSv1_2_method',

@@ -4,3 +4,5 @@ test/ssl
 test/logs
 test/boards/
 test/public/
+test/package-lock.json
+test/server.pid

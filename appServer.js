@@ -161,7 +161,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
     }
 
     // console.log('argv:', process.argv);
-    console.log('API_PORT:', port);
+    // console.log('API_PORT:', port);
     console.log(`${protocol}://${hostname}:${port}`)   // goes to log file
 
     if (sslOptions && sslOptions.startupMessage) {

@@ -1,5 +1,5 @@
 {
-  "name": "mini-swine-server",
+  "name": "simple-express-test",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -12,20 +12,13 @@
   "license": "ISC",
   "dependencies": {
     "@babel/core": "^7.19.3",
-    "@martinjackson/simple-express": "^1.0.36",
-    "@nctr/appserver": "^1.0.29",
-    "@nctr/database": "^0.9.7",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
-    "express-graphql": "^0.12.0",
     "formidable": "^2.0.1",
-    "graphql": "^16.6.0",
-    "graphql-iso-date": "^3.6.1",
     "node-fetch": "^3.2.10",
     "path": "^0.12.7",
-    "sendmail": "^1.6.1",
     "serve-index": "^1.9.1",
     "unsplash-js": "^7.0.15"
   },

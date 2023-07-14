@@ -11,5 +11,5 @@ mkdir -p logs
 # stop previous if it is running
 . ./stop.sh
 
-node  --trace-warnings server.js SIMPLE_EXPRESS_TEST &
+sudo node  --trace-warnings server.js --public './public' --fqdn 'streamof.info' SIMPLE_EXPRESS_TEST &
 echo "$!" >server.pid
