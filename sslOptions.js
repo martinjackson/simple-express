@@ -1,8 +1,8 @@
 
 const fs = require('fs');
-const path = require('path');
-const os = require('os');
 const { exit } = require('process');
+// const path = require('path');
+// const os = require('os');
 
 const genSSLOptions = (fqdn) => {
 

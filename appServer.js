@@ -1,7 +1,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
+// const os = require('os');
 const crypto = require('crypto');
 
 const express = require('express');
@@ -116,7 +116,7 @@ const serve = async (makeRouter, dotEnvPath) => {
     app.use(serveIndex(home));         // serve a directory view
 
     // field all unanswered request and reply with the SPA (Single Page App)
-    app.use((req, res, next) => {
+    app.use((req, res, _next) => {
         const type = path.extname(fpath);
         res.setHeader("content-type", type);
         fs.createReadStream(fpath).pipe(res);
