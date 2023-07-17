@@ -6,6 +6,7 @@ const crypto = require('crypto');
 
 const express = require('express');
 const https = require("https");
+const helmet = require('helmet')
 const http  = require('http');
 const cors = require('cors');
 const cookieParser = require('cookie-parser')
@@ -125,7 +126,7 @@ const serve = async (makeRouter, dotEnvPath) => {
     start(app, argv.port, !argv.http, logFile, argv.fqdn)
 
     // after the log redirect
-    console.log(`home:${home}  unknown-urls:${fpath}`)
+    console.log(`home: ${home}  unknown-urls: ${fpath}`)
 
     return argv
 }
@@ -146,7 +147,14 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
        protocol = 'http'
     } else {
       const {genSSLOptions} = require('./sslOptions.js');
-       sslOptions = genSSLOptions(fqdn)
+      sslOptions = genSSLOptions(fqdn)
+
+      const ONE_YEAR = 31536000000
+      app.use(helmet.hsts({
+          maxAge: ONE_YEAR,
+          includeSubDomains: true,
+          force: true
+          }))
        server = https.createServer(sslOptions, app);
        protocol = 'https'
     }

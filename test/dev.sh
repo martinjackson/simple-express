@@ -1,10 +1,12 @@
 #!/bin/bash
 
-. ./oracle-env.sh
 mkdir -p logs
+
+# get PROCESS_NAME
+. ./.env
 
 # stop previous if it is running
 . ./stop.sh
 
-node  --trace-warnings server.js --nolog SIMPLE_EXPRESS_TEST
-echo "$!" >server.pid
+node  --trace-warnings server.js --nolog $PROCESS_NAME
+
