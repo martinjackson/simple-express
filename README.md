@@ -1,23 +1,24 @@
+
+## Latest update 
+
+removed several of the weak SSL encryptions that were included a default in NodeJS
+(see sslOptions.js for the new shorter list).
+
 ## How to Use:
 
 ### server.js
 -----------------------------
 ```js
 
-import serviceRunning from 'service-already-running'
 import { serve } from '@martinjackson/simple-express'
 
 import apiRoutes from './apiRoutes.js'
 
 const run = async () => {
     console.log('\n-------------------------------------------------------');
-    // await serviceRunning.listAll();
-    await serviceRunning.killOthers();
-
-    serve(apiRoutes, '../.env')
+    serve(apiRoutes, './.env')
 
     // run with --help for all the options
-    // use ./start.sh or ./test.sh to start (easier to stop later)}
 }
 
 run()
@@ -31,15 +32,8 @@ run()
 let fs = require('fs');
 let express = require('express');
 
-const sendmail = require('sendmail')();
-
-// const { graphqlHTTP } = require('express-graphql');
-// const schema = require('./schema.js');
-
 const makeRouter = (argv) => {
     let router = express.Router();
-
-   // router.use('/graphql', graphqlHTTP({ schema: schema, graphiql: true, }));
 
     router.get('/api/example/:n', function (req, res) {
         console.log(`GET: /api/example/ ${req.params.n}`);
