@@ -1,44 +1,43 @@
 
-const fs = require('fs');
-const path = require('path');
-// const os = require('os');
-const crypto = require('crypto');
-
-const express = require('express');
-const https = require("https");
+const fs = require('fs')
+const path = require('path')
+const crypto = require('crypto')
+const express = require('express')
+const https = require("https")
 const helmet = require('helmet')
-const http  = require('http');
-const cors = require('cors');
+const http  = require('http')
+const cors = require('cors')
 const cookieParser = require('cookie-parser')
-const serveIndex = require('serve-index');
+const serveIndex = require('serve-index')
 const session = require('express-session')
-const dotenv = require('dotenv');
+const dotenv = require('dotenv')
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
-const getFQDN = require('get-fqdn');
+const getFQDN = require('get-fqdn')
 
-const debug = require('./server-debug.js');
-const log = require('./server-log.js');
-const { logResponseTime } = require("./response-time-logger");
+const debug = require('./server-debug.js')
+const { log } = require('./server-log.js')
+const { shutdownSetup } = require('./server-shutdown.js')
+const { logResponseTime } = require("./response-time-logger")
 
-const addMonitorRoutes = require('./apiMonitorRoutes.js');
+const addMonitorRoutes = require('./apiMonitorRoutes.js')
 
 
 // -----------------------------------------------------------------------------------------------
 const serve = async (makeRouter, dotEnvPath) => {
 
-    console.log('dotenv: ', dotEnvPath);
+    console.log('dotenv: ', dotEnvPath)
     const result = dotenv.config({ path: dotEnvPath })
     if (result.error) {
-      console.log('dotenv error:', result.error);
+      console.log('dotenv error:', result.error)
       throw result.error
     }
 
     if (!process.env.FQDN) {
       try {
-        process.env.FQDN = await getFQDN();
+        process.env.FQDN = await getFQDN()
       } catch (err) {
-        console.error('get-fqdn error:', err);
+        console.error('get-fqdn error:', err)
       }
     }
 
@@ -80,16 +79,16 @@ const serve = async (makeRouter, dotEnvPath) => {
     const logFile = (argv.nolog) ? null : argv.logFile
     const home = (fs.existsSync(argv.public)) ? argv.public : '.'
 
-    const app = express();
+    const app = express()
 
-    app.use(logResponseTime);          // put each request's response time in the log file
+    app.use(logResponseTime)          // put each request's response time in the log file
 
     /*
     if (!argv.nomonitor) {
       // npm install express-status-monitor --save
-      const statusMonitor = require('express-status-monitor')();
+      const statusMonitor = require('express-status-monitor')()
 
-      app.use(statusMonitor);
+      app.use(statusMonitor)
       app.get('/status', statusMonitor.pageRoute)
     }
     */
@@ -104,24 +103,44 @@ const serve = async (makeRouter, dotEnvPath) => {
     const limit = '50mb'      // defailt is 1mb
     app.use(express.json({limit}))                          // for parsing application/json
     app.use(express.urlencoded({ limit, extended: true }))  // for parsing application/x-www-form-urlencoded
-    app.use(cors());
+    app.use(cors())
     app.use(cookieParser())
 
     const router = makeRouter(argv)
     addMonitorRoutes(router)
-    app.use(router);
+    app.use(router)
 
-    const fpath = path.join(home, 'index.html');
+    const fpath = path.join(home, 'index.html')
 
-    app.use(express.static(home));     // serve up static content
-    app.use(serveIndex(home));         // serve a directory view
+    app.use(express.static(home))     // serve up static content
+    app.use(serveIndex(home))         // serve a directory view
 
+/*
+This is causing crashes
     // field all unanswered request and reply with the SPA (Single Page App)
     app.use((req, res, _next) => {
-        const type = path.extname(fpath);
-        res.setHeader("content-type", type);
-        fs.createReadStream(fpath).pipe(res);
+        console.log('field all unanswered request and reply with the SPA (Single Page App)', req.url);
+        const type = path.extname(fpath)
+        res.setHeader("content-type", type)
+        try {
+          fs.createReadStream(fpath).pipe(res)
+        } catch (err) {
+          console.log('reply with the SPA (Single Page App) failed:', err);
+          res.status(500)
+          res.render('error', { error: err })
+        }
     })
+*/
+
+    const errorHandler = (error, request, response, _next) => {
+      // Error handling middleware functionality
+      console.log( `error ${error.message}`) // log the error
+      const status = error.status || 400
+      // send back an easily understandable error message to the caller
+      response.status(status).send(error.message)
+    }
+
+    app.use(errorHandler)
 
     start(app, argv.port, !argv.http, logFile, argv.fqdn)
 
@@ -135,7 +154,6 @@ const serve = async (makeRouter, dotEnvPath) => {
 // -----------------------------------------------------------------------------------------------
 function start(app,port,httpsFlag,logFileName, fqdn) {
 
-
   // node server.js http INVM (turns off SSL stuff)
     let protocol
     let server
@@ -146,7 +164,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
        server = http.createServer(app)
        protocol = 'http'
     } else {
-      const {genSSLOptions} = require('./sslOptions.js');
+      const {genSSLOptions} = require('./sslOptions.js')
       sslOptions = genSSLOptions(fqdn)
 
       const ONE_YEAR = 31536000000
@@ -155,7 +173,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
           includeSubDomains: true,
           force: true
           }))
-       server = https.createServer(sslOptions, app);
+       server = https.createServer(sslOptions, app)
        protocol = 'https'
     }
 
@@ -164,30 +182,32 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
     // from remote ssh to localhost
     console.log(`Starting ${protocol}://${hostname}:${port}`, process.pid,'\n\n')
 
+    shutdownSetup()
+
     if (logFileName !== null) {
       log(logFileName)
     }
 
-    // console.log('argv:', process.argv);
-    // console.log('API_PORT:', port);
+    // console.log('argv:', process.argv)
+    // console.log('API_PORT:', port)
     console.log(`${protocol}://${hostname}:${port}`)   // goes to log file
 
     if (sslOptions && sslOptions.startupMessage) {
       sslOptions.startupMessage.map(line => console.log(line))
     }
 
-    debug(server, port, hostname);
+    debug(server, port, hostname)
     server.listen(port, function(err) {
       if (err) {
         console.log("Error in server setup")
-        console.log('Err:', err);
+        console.log('Err:', err)
       } else {
-        console.log("Server listening on Port", port);
+        console.log("Server listening on Port", port)
       }
-      console.log('');
-      console.log('');
-      console.log('');         // some terminal prompts need <CR> after last output
-    });
+      console.log('')
+      console.log('')
+      console.log('')         // some terminal prompts need <CR> after last output
+    })
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -197,9 +217,9 @@ function atomicSave(fname, obj, id) {
     const dest = `${fname}`
     fs.writeFileSync(temp, JSON.stringify(obj, null, 2))
     fs.copyFile(temp,dest, (err) => {
-      if (err) throw err;
-      // console.log(dest+' was updated.');
-    });
+      if (err) throw err
+      // console.log(dest+' was updated.')
+    })
     fs.rmSync(temp)
   } catch (err) {
     console.error(err)
@@ -219,11 +239,11 @@ function responseFile(filePath, response) {
         response.status(200)
         response.append("Content-Type", "application/octet-stream")
         response.append("Content-Disposition", "attachment; filename=" + filePath)
-        fs.createReadStream(filePath).pipe(response);
+        fs.createReadStream(filePath).pipe(response)
       } else {
-        response.status(404).send("ERROR File does not exist: "+filePath);
+        response.status(404).send("ERROR File does not exist: "+filePath)
       }
-    });
+    })
 }
 
 

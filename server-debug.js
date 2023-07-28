@@ -40,10 +40,12 @@ function debug(server, port, hostname) {
     switch (error.code) {
       case "EACCES":
         console.error(desc + " requires elevated privileges");
+        console.log(desc + " requires elevated privileges");
         process.exit(1);
         break;
       case "EADDRINUSE":
         console.error(desc + " is already in use");
+        console.log(desc + " is already in use");
         process.exit(1);
         break;
       default:

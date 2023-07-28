@@ -11,15 +11,16 @@ let logger = null
 // ----------------------------------------------------------------------------------------------------
 function logShutdown() {
 
+   if (logger != null) {
+      console.log('Server Log last-line-before-shutdown.');
+      logger.end()
+   }
+
    if (saveStdOut != null)
       process.stdout.write = saveStdOut
 
    if (saveStdErr != null)
       process.stderr.write = saveStdErr
-
-   if (logger != null) {
-      logger.
-   }
 
 }
 
