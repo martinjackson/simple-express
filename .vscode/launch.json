@@ -7,7 +7,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "http test",
+            "name": "http test streamof.info",
             "skipFiles": [
                 "<node_internals>/**"
             ],
@@ -20,7 +20,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "https test",
+            "name": "https test streamof.info",
             "skipFiles": [
                 "<node_internals>/**"
             ],
@@ -29,6 +29,32 @@
 
             // "args": ["--arg1", "value1", "--arg2", "value2"],
             "args": ["--https", "--public", "./public/", "--fqdn", "streamof.info", "SIMPLE_EXPRESS_TEST"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "http test localhost",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "./server.js",
+            "cwd": "${workspaceFolder}/test/",
+
+            // "args": ["--arg1", "value1", "--arg2", "value2"],
+            "args": ["--http", "--nolog", "--fqdn", "localhost", "--public", "./public/", "SIMPLE_EXPRESS_TEST"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "https test localhost",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "./server.js",
+            "cwd": "${workspaceFolder}/test/",
+
+            // "args": ["--arg1", "value1", "--arg2", "value2"],
+            "args": ["--https", "--nolog", "--fqdn", "localhost", "--public", "./public/", "SIMPLE_EXPRESS_TEST"]
         }
     ]
 }

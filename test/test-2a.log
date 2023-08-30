@@ -1,0 +1,4 @@
+[2023-08-30T21:19:01.260Z] port: 8000 logFile: logs/test-2a-server.log fqdn: 'localhost' publicDir: ./public/ httpsFlag: true
+[2023-08-30T21:19:01.293Z] Starting https://localhost:8000 2465218 
+
+

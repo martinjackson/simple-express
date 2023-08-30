@@ -1,5 +1,6 @@
 
 const fs = require('fs')
+const { exists } = require('node:fs')
 const path = require('path')
 const crypto = require('crypto')
 const express = require('express')
@@ -21,7 +22,7 @@ const { shutdownSetup } = require('./server-shutdown.js')
 const { logResponseTime } = require("./response-time-logger")
 
 const addMonitorRoutes = require('./apiMonitorRoutes.js')
-
+const {genSSLOptions} = require('./sslOptions.js')
 
 // -----------------------------------------------------------------------------------------------
 const serve = async (makeRouter, dotEnvPath) => {
@@ -33,14 +34,6 @@ const serve = async (makeRouter, dotEnvPath) => {
       throw result.error
     }
 
-    if (!process.env.FQDN) {
-      try {
-        process.env.FQDN = await getFQDN()
-      } catch (err) {
-        console.error('get-fqdn error:', err)
-      }
-    }
-
     const argv = yargs(hideBin(process.argv))
         .option('port', {
           alias: 'p',
@@ -50,11 +43,12 @@ const serve = async (makeRouter, dotEnvPath) => {
         })
         .option('fqdn', {
           description: 'fully qualified domain name',
-          default: process.env.FQDN
+          default: null
         })
         .option('http', {
           type: 'boolean',
-          description: 'Run with http protocol (default is https)'
+          description: 'Run with http protocol (default is https)',
+          default: false
         })
         .option('nolog', {
           alias: 'n',
@@ -77,79 +71,123 @@ const serve = async (makeRouter, dotEnvPath) => {
         .argv
 
     const logFile = (argv.nolog) ? null : argv.logFile
-    const home = (fs.existsSync(argv.public)) ? argv.public : '.'
-
-    const app = express()
-
-    app.use(logResponseTime)          // put each request's response time in the log file
-
-    /*
-    if (!argv.nomonitor) {
-      // npm install express-status-monitor --save
-      const statusMonitor = require('express-status-monitor')()
-
-      app.use(statusMonitor)
-      app.get('/status', statusMonitor.pageRoute)
-    }
-    */
-
-    // make req.sessionID and req.session.id available
-    app.use(session({
-      secret: crypto.randomBytes(20).toString("hex"),      // every server restart -- all previous cookies are invalid
-      resave: false,
-      saveUninitialized: true
-    }))
-
-    const limit = '50mb'      // defailt is 1mb
-    app.use(express.json({limit}))                          // for parsing application/json
-    app.use(express.urlencoded({ limit, extended: true }))  // for parsing application/x-www-form-urlencoded
-    app.use(cors())
-    app.use(cookieParser())
 
     const router = makeRouter(argv)
-    addMonitorRoutes(router)
-    app.use(router)
 
-    const fpath = path.join(home, 'index.html')
 
-    app.use(express.static(home))     // serve up static content
-    app.use(serveIndex(home))         // serve a directory view
-
-/*
-This is causing crashes
-    // field all unanswered request and reply with the SPA (Single Page App)
-    app.use((req, res, _next) => {
-        console.log('field all unanswered request and reply with the SPA (Single Page App)', req.url);
-        const type = path.extname(fpath)
-        res.setHeader("content-type", type)
-        try {
-          fs.createReadStream(fpath).pipe(res)
-        } catch (err) {
-          console.log('reply with the SPA (Single Page App) failed:', err);
-          res.status(500)
-          res.render('error', { error: err })
-        }
-    })
-*/
-
-    const errorHandler = (error, request, response, _next) => {
-      // Error handling middleware functionality
-      console.log( `error ${error.message}`) // log the error
-      const status = error.status || 400
-      // send back an easily understandable error message to the caller
-      response.status(status).send(error.message)
-    }
-
-    app.use(errorHandler)
-
-    start(app, argv.port, !argv.http, logFile, argv.fqdn)
-
-    // after the log redirect
-    console.log(`home: ${home}  unknown-urls: ${fpath}`)
+    const httpsFlag = (argv.http) ? false : true
+    startHardenedServer(router, argv.port, logFile, argv.fqdn, argv.public, httpsFlag)
 
     return argv
 }
 
+
+// -----------------------------------------------------------------------------------------------
+const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null, publicDir='.', httpsFlag=true) => {
+
+  console.log('port:', port, 'logFile:', logFile, `fqdn: '${fqdn}'`, 'publicDir:', publicDir, 'httpsFlag:', httpsFlag);
+
+  if (!fqdn) {
+    try {
+      fqdn = await getFQDN()
+    } catch (err) {
+      console.error('get-fqdn error:', err)
+    }
+  }
+
+  if (fqdn.endsWith('.')) {
+    fqdn = fqdn.slice(0, -1)
+    console.log('fqdn trimmed.', fqdn);
+  }
+
+  const home = (fs.existsSync(publicDir)) ? publicDir : '.'
+
+  const app = express()
+
+  app.use(logResponseTime)          // put each request's response time in the log file
+
+  // make req.sessionID and req.session.id available
+  app.use(session({
+    secret: crypto.randomBytes(20).toString("hex"),      // every server restart -- all previous cookies are invalid
+    resave: false,
+    saveUninitialized: true
+  }))
+
+  const limit = '50mb'      // defailt is 1mb
+  app.use(express.json({limit}))                          // for parsing application/json
+  app.use(express.urlencoded({ limit, extended: true }))  // for parsing application/x-www-form-urlencoded
+  app.use(cors())
+  app.use(cookieParser())
+
+  addMonitorRoutes(router)
+  app.use(router)
+
+  const fpath = path.join(home, 'index.html')
+  exists(fpath, (exists) => {
+    if (exists) {
+      console.log('Found', fpath);
+    } else {
+      const page = `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Default index.html</title>
+      </head>
+      <body>
+        <h1>Default index.html</h1>
+      </body>
+      </html>
+      `
+      fs.writeFile(fpath, page, err => {
+        if (err) {
+          console.error('Error writing missing', fpath, 'error:', err);
+        } else {
+          console.log('Created missing', fpath, 'w/o error.');
+        }
+      });
+    }
+  })
+
+  app.use(express.static(home))     // serve up static content
+  app.use(serveIndex(home))         // serve a directory view
+
+  const errorHandler = (error, request, response, _next) => {
+    // Error handling middleware functionality
+    console.log( `error ${error.message}`) // log the error
+
+    // send back an easily understandable error message to the caller
+
+    const page = `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <title>Something went wrong</title>
+    </head>
+    <body>
+      <h1>Something went wrong</h1>
+      ${error.message}
+    </body>
+    </html>
+    `
+
+    const status = error.status || 400
+    response.status(status)
+    response.send(page);
+
+  }
+
+  app.use(errorHandler)
+
+  start(app, port, httpsFlag, logFile, fqdn)
+
+  // after the log redirect
+  console.log(`home: ${home}  unknown-urls: ${fpath}`)
+
+}
 
 // -----------------------------------------------------------------------------------------------
 function start(app,port,httpsFlag,logFileName, fqdn) {
@@ -164,7 +202,6 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
        server = http.createServer(app)
        protocol = 'http'
     } else {
-      const {genSSLOptions} = require('./sslOptions.js')
       sslOptions = genSSLOptions(fqdn)
 
       const ONE_YEAR = 31536000000
@@ -231,7 +268,7 @@ function atomicSave(fname, obj, id) {
 function responseFile(filePath, response) {
 
   // Check if file specified by the filePath exists
-  fs.exists(filePath, function(exists){
+  exists(filePath, (exists) => {
       if (exists) {
         // Content-type is very interesting part that guarantee that
         // Web browser will handle response in an appropriate manner.
@@ -248,4 +285,4 @@ function responseFile(filePath, response) {
 
 
 
-module.exports = { serve, atomicSave, responseFile }
+module.exports = { serve, startHardenedServer, atomicSave, responseFile }

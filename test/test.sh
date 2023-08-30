@@ -7,5 +7,5 @@ mkdir -p logs
 . ./stop.sh
 
 echo "Warning: http (no s)"
-node  --trace-warnings --inspect server.js --http -n RTP &
+node  --trace-warnings --inspect server.js --http -n $PROCESS_NAME &
 echo "$!" >server.pid

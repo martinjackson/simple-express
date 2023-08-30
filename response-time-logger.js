@@ -10,6 +10,16 @@ function logResponseTime(req, res, next) {
   const startHrTime = process.hrtime()
   const when = (new Date()).toLocaleString('en-US')
 
+  console.log("REQ-IN: %s  %s ", when, req.path);
+
+  req.on("error", error => {
+    console.log("REQ-ERROR: %s  %s ", when, req.path, error.message);
+  });
+
+  res.on("error", error => {
+    console.log("RESP-ERROR: %s  %s ", when, req.path, error.message);
+  });
+
   res.on("finish", () => {
     const elapsedHrTime = process.hrtime(startHrTime);
     const elapsedTimeInMs = elapsedHrTime[0] * 1000 + elapsedHrTime[1] / 1e6;
@@ -23,7 +33,7 @@ function logResponseTime(req, res, next) {
 
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress
 
-    console.log("TIME-STAT: %s  %s : %fms %s %s %s", when, req.path, elapsedTimeInMs, id, user, ip);
+    console.log("REQ-STAT: %s  %s : %fms %s %s %s", when, req.path, elapsedTimeInMs, id, user, ip);
 
     responseQueue.push({when, path: req.path, elapsedTimeInMs, id, user, ip})
     if (responseQueue.length > QUEUE_LIMIT) {
