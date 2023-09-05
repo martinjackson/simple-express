@@ -15,6 +15,7 @@ const dotenv = require('dotenv')
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 const getFQDN = require('get-fqdn')
+const killable = require('killable')
 
 const debug = require('./server-debug.js')
 const { log } = require('./server-log.js')
@@ -83,7 +84,8 @@ const serve = async (makeRouter, dotEnvPath) => {
 
 
 // -----------------------------------------------------------------------------------------------
-const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null, publicDir='.', httpsFlag=true) => {
+const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null,
+  publicDir='.', httpsFlag=true, requestCert=false) => {
 
   console.log('port:', port, 'logFile:', logFile, `fqdn: '${fqdn}'`, 'publicDir:', publicDir, 'httpsFlag:', httpsFlag);
 
@@ -116,7 +118,16 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null, p
   const limit = '50mb'      // defailt is 1mb
   app.use(express.json({limit}))                          // for parsing application/json
   app.use(express.urlencoded({ limit, extended: true }))  // for parsing application/x-www-form-urlencoded
-  app.use(cors())
+
+  //  port1 = 443   app1.use(cors({credentials: true}))   ssl options1 = { ...ssl, requestCert: false }
+  //  port2 = 4430  app2 did not call cors at all         ssl options2 = { ...ssl, requestCert: true  }
+
+  if (!requestCert) {
+    app.use(cors({credentials: true}))
+  } else {
+    app.use(cors());        // original node-util port 4430 did not call cors at all
+  }
+
   app.use(cookieParser())
 
   addMonitorRoutes(router)
@@ -182,7 +193,7 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null, p
 
   app.use(errorHandler)
 
-  start(app, port, httpsFlag, logFile, fqdn)
+  start(app, port, httpsFlag, logFile, fqdn, requestCert)
 
   // after the log redirect
   console.log(`home: ${home}  unknown-urls: ${fpath}`)
@@ -190,7 +201,7 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null, p
 }
 
 // -----------------------------------------------------------------------------------------------
-function start(app,port,httpsFlag,logFileName, fqdn) {
+function start(app,port,httpsFlag,logFileName, fqdn, requestCert=false) {
 
   // node server.js http INVM (turns off SSL stuff)
     let protocol
@@ -202,7 +213,7 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
        server = http.createServer(app)
        protocol = 'http'
     } else {
-      sslOptions = genSSLOptions(fqdn)
+      sslOptions = genSSLOptions(fqdn, requestCert)
 
       const ONE_YEAR = 31536000000
       app.use(helmet.hsts({
@@ -245,6 +256,9 @@ function start(app,port,httpsFlag,logFileName, fqdn) {
       console.log('')
       console.log('')         // some terminal prompts need <CR> after last output
     })
+
+    killable(server)
+
 }
 
 // -------------------------------------------------------------------------------------------------

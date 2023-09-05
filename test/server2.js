@@ -1,9 +1,8 @@
 /* eslint-disable indent */
 
-// const { serve } = require('@martinjackson/simple-express')
-
 // const { serve } = require('../appServer.js')
-const { argv } = require('process')
+// const { argv } = require('process')
+
 const { startHardenedServer }  = require('../appServer.js')
 
 const apiRoutes = require('./apiRoutes.js')

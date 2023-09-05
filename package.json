@@ -25,6 +25,7 @@
     "helmet": "^7.0.0",
     "http": "^0.0.1-security",
     "https": "^1.0.0",
+    "killable": "^1.0.1",
     "log-timestamp": "^0.3.0",
     "serve-index": "^1.9.1",
     "yargs": "^17.1.1"
