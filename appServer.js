@@ -193,11 +193,12 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null,
 
   app.use(errorHandler)
 
-  start(app, port, httpsFlag, logFile, fqdn, requestCert)
+  const server = start(app, port, httpsFlag, logFile, fqdn, requestCert)
 
   // after the log redirect
   console.log(`home: ${home}  unknown-urls: ${fpath}`)
 
+  return server
 }
 
 // -----------------------------------------------------------------------------------------------
@@ -259,6 +260,7 @@ function start(app,port,httpsFlag,logFileName, fqdn, requestCert=false) {
 
     killable(server)
 
+    return server
 }
 
 // -------------------------------------------------------------------------------------------------

@@ -1,9 +1,8 @@
 
 const fs = require('fs')
-const tls = require('tls')
 const { exit } = require('process')
-// const path = require('path')
-// const os = require('os')
+
+// const tls = require('tls')
 
 const genSSLOptions = (fqdn) => {
 
