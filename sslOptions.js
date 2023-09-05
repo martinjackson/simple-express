@@ -4,7 +4,7 @@ const { exit } = require('process')
 
 // const tls = require('tls')
 
-const genSSLOptions = (fqdn) => {
+const genSSLOptions = (fqdn, requestCert) => {
 
    // taken from io.js' TLS docs
    // https://iojs.org/api/tls.html
@@ -56,7 +56,7 @@ at https://www.ssllabs.com/ssltest/analyze.html
 
     let sslOptions = {
         secureProtocol:'TLSv1_2_method',
-        requestCert: false,
+        requestCert: requestCert,
         rejectUnauthorized: false,
         ciphers: ciphers,
         honorCipherOrder: true
