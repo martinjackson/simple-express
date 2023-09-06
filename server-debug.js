@@ -4,7 +4,7 @@ const os = require('os');
 function debug(server, port, hostname) {
 
   if (port < 1000) {
-    console.log(`Operating on Port ${port} requires privilege`);
+    console.log(port+`: *** Operating on Port ${port} requires privilege ***`);
   }
 
   function getIP() {
@@ -19,7 +19,7 @@ function debug(server, port, hostname) {
     const ip = getIP();
 
     var desc = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
-    console.log (hostname+" "+msg+" on " + ip + " " + desc);
+    console.log (addr.port+': '+hostname+" "+msg+" on " + ip + " " + desc);
   }
 
 

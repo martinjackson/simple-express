@@ -16,8 +16,10 @@ function getUserFromResponse(response) {
   let id = '-'
   let user = '-'
   if (req.cookies) {
-      id = req?.cookies["NCTR_REMOTE_ID"] || '-'
-      user = req?.cookies["NCTR_REMOTE_USER"] || '-'
+    id = req?.cookies["NCTR_REMOTE_ID"] || '-'
+    user = req?.cookies["NCTR_REMOTE_USER"] || '-'
+  } else {
+    console.log('--- getUserFromResponse() no req.cookies ---');   // TODO: take this out
   }
 
   const ip = req.ip

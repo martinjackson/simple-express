@@ -89,12 +89,12 @@ const serve = async (makeRouter, dotEnvPath) => {
 // -----------------------------------------------------------------------------------------------
 const startHardenedServer = async (router, port=3000, fqdn=null, publicDir='.', httpsFlag=true, requestCert=false) => {
 
-  console.log('port:', port, `fqdn: '${fqdn}'`, 'publicDir:', publicDir, 'httpsFlag:', httpsFlag, 'requestCert:', requestCert);
+  console.log(`${port}: fqdn: '${fqdn}'`, 'publicDir:', publicDir, 'httpsFlag:', httpsFlag, 'requestCert:', requestCert);
 
   const protocol = (httpsFlag) ? 'https' : 'http'
   let hostname = (fqdn) ? fqdn : 'localhost'
 
-  console.log(`Starting ${protocol}://${hostname}:${port}`, process.pid,'\n\n')
+  console.log(`${port}: Starting ${protocol}://${hostname}:${port}`, process.pid,'\n\n')
 
   if (!fqdn) {
     try {
@@ -220,7 +220,7 @@ function start(app, port, httpsFlag, fqdn, requestCert=false) {
 
     // console.log('argv:', process.argv)
     // console.log('API_PORT:', port)
-    console.log(`${protocol}://${hostname}:${port}`)   // goes to log file, if there is one...
+    console.log(`${port}: ${protocol}://${hostname}:${port}`)   // goes to log file, if there is one...
 
     if (!httpsFlag) {
        server = http.createServer(app)

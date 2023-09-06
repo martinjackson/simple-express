@@ -14,7 +14,7 @@ function logResponseTime(req, res, next) {
 
   const port = req.socket.address().port
 
-  console.log("%d: REQ-IN: %s  %s ", port, when, req.path);
+  console.log("%d: REQ-IN:   %s  %s ", port, when, req.path);   // 2 extra spaces to line up with REQ-STAT
 
   req.on("error", error => {
     console.log("%d: REQ-ERROR: %s  %s ", port, when, req.path, error.message);
