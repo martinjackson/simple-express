@@ -84,10 +84,14 @@ const serve = async (makeRouter, dotEnvPath) => {
 
 
 // -----------------------------------------------------------------------------------------------
-const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null,
-  publicDir='.', httpsFlag=true, requestCert=false) => {
+const startHardenedServer = async (router, port=3000, fqdn=null, publicDir='.', httpsFlag=true, requestCert=false) => {
 
-  console.log('port:', port, 'logFile:', logFile, `fqdn: '${fqdn}'`, 'publicDir:', publicDir, 'httpsFlag:', httpsFlag);
+  console.log('port:', port, `fqdn: '${fqdn}'`, 'publicDir:', publicDir, 'httpsFlag:', httpsFlag, 'requestCert:', requestCert);
+
+  const protocol = (httpsFlag) ? 'https' : 'http'
+  let hostname = (fqdn) ? fqdn : 'localhost'
+
+  console.log(`Starting ${protocol}://${hostname}:${port}`, process.pid,'\n\n')
 
   if (!fqdn) {
     try {
@@ -99,7 +103,7 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null,
 
   if (fqdn.endsWith('.')) {
     fqdn = fqdn.slice(0, -1)
-    console.log('fqdn trimmed.', fqdn);
+    console.log(port+':','fqdn trimmed.', fqdn);
   }
 
   const home = (fs.existsSync(publicDir)) ? publicDir : '.'
@@ -124,8 +128,10 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null,
 
   if (!requestCert) {
     app.use(cors({credentials: true}))
+    console.log(port+':','app.use(cors({credentials: true}))');
   } else {
-    app.use(cors());        // original node-util port 4430 did not call cors at all
+    // app.use(cors());        // original node-util port 4430 did not call cors at all
+    console.log(port+':','startHardenedServer() app.use(cors()) not called.');
   }
 
   app.use(cookieParser())
@@ -136,7 +142,7 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null,
   const fpath = path.join(home, 'index.html')
   exists(fpath, (exists) => {
     if (exists) {
-      console.log('Found', fpath);
+      console.log(port+':','Found', fpath);
     } else {
       const page = `<!DOCTYPE html>
       <html lang="en">
@@ -155,7 +161,7 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null,
         if (err) {
           console.error('Error writing missing', fpath, 'error:', err);
         } else {
-          console.log('Created missing', fpath, 'w/o error.');
+          console.log(port+':', 'Created missing', fpath, 'w/o error.');
         }
       });
     }
@@ -166,10 +172,9 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null,
 
   const errorHandler = (error, request, response, _next) => {
     // Error handling middleware functionality
-    console.log( `error ${error.message}`) // log the error
+    console.log(port+':', `error ${error.message}`, error) // log the error
 
     // send back an easily understandable error message to the caller
-
     const page = `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -193,69 +198,52 @@ const startHardenedServer = async (router, port=3000, logFile=null, fqdn=null,
 
   app.use(errorHandler)
 
-  const server = start(app, port, httpsFlag, logFile, fqdn, requestCert)
+  const server = start(app, port, httpsFlag, fqdn, requestCert)
 
   // after the log redirect
-  console.log(`home: ${home}  unknown-urls: ${fpath}`)
+  console.log(port+':',`home: ${home}  unknown-urls: ${fpath}`)
 
   return server
 }
 
 // -----------------------------------------------------------------------------------------------
-function start(app,port,httpsFlag,logFileName, fqdn, requestCert=false) {
+function start(app, port, httpsFlag, fqdn, requestCert=false) {
 
-  // node server.js http INVM (turns off SSL stuff)
-    let protocol
     let server
     let sslOptions = null
+
+    const protocol = (httpsFlag) ? 'https' : 'http'
     let hostname = (fqdn) ? fqdn : 'localhost'
-
-    if (!httpsFlag) {
-       server = http.createServer(app)
-       protocol = 'http'
-    } else {
-      sslOptions = genSSLOptions(fqdn, requestCert)
-
-      const ONE_YEAR = 31536000000
-      app.use(helmet.hsts({
-          maxAge: ONE_YEAR,
-          includeSubDomains: true,
-          force: true
-          }))
-       server = https.createServer(sslOptions, app)
-       protocol = 'https'
-    }
-
-    // on stdout for vscode (before redirected to log file),
-    // so vscode will detecct and auto-setup ssh redirect
-    // from remote ssh to localhost
-    console.log(`Starting ${protocol}://${hostname}:${port}`, process.pid,'\n\n')
-
-    shutdownSetup()
-
-    if (logFileName !== null) {
-      log(logFileName)
-    }
 
     // console.log('argv:', process.argv)
     // console.log('API_PORT:', port)
-    console.log(`${protocol}://${hostname}:${port}`)   // goes to log file
+    console.log(`${protocol}://${hostname}:${port}`)   // goes to log file, if there is one...
+
+    if (!httpsFlag) {
+       server = http.createServer(app)
+    } else {
+      const ONE_YEAR = 31536000000
+      app.use(helmet.hsts( {maxAge: ONE_YEAR, includeSubDomains: true, force: true} ))
+
+      sslOptions = genSSLOptions(fqdn, requestCert, port)
+      server = https.createServer(sslOptions, app)
+    }
+
+    shutdownSetup()
 
     if (sslOptions && sslOptions.startupMessage) {
-      sslOptions.startupMessage.map(line => console.log(line))
+      sslOptions.startupMessage.map(line => console.log(port+':',line))
     }
 
     debug(server, port, hostname)
     server.listen(port, function(err) {
       if (err) {
-        console.log("Error in server setup")
-        console.log('Err:', err)
+        console.log(port+':',"Error in server setup")
+        console.log(port+':','Err:', err)
       } else {
-        console.log("Server listening on Port", port)
+        console.log(port+':',"Server listening on Port", port)
       }
-      console.log('')
-      console.log('')
-      console.log('')         // some terminal prompts need <CR> after last output
+      console.log(port+':','')         // some terminal prompts need <CR> after last output
     })
 
     killable(server)
@@ -301,4 +289,4 @@ function responseFile(filePath, response) {
 
 
 
-module.exports = { serve, startHardenedServer, atomicSave, responseFile }
+module.exports = { serve, startHardenedServer, atomicSave, responseFile, log }

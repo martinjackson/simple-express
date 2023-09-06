@@ -4,7 +4,7 @@ const { exit } = require('process')
 
 // const tls = require('tls')
 
-const genSSLOptions = (fqdn, requestCert) => {
+const genSSLOptions = (fqdn, requestCert, port) => {
 
    // taken from io.js' TLS docs
    // https://iojs.org/api/tls.html
@@ -62,19 +62,21 @@ at https://www.ssllabs.com/ssltest/analyze.html
         honorCipherOrder: true
       }
 
+    console.log(port+':','sslOptions:', sslOptions);
+
     const sslDirs = ['/opt/Certs/', 'ssl/']
     const sslDir = sslDirs.find(dir => fs.existsSync(dir+fqdn+'.key') )
     if (!sslDir) {
-      console.log(`Can not find SSL key file (${fqdn+'.key'} in ${sslDirs})`)
-      console.log('ERROR: can not start server.')
+      console.log(port+':',`Can not find SSL key file (${fqdn+'.key'} in ${sslDirs})`)
+      console.log(port+':','ERROR: can not start server.')
       exit()
     }
 
     const certExts = ['.pem', '.cer', '.crt', '.cert']
     const certExt = certExts.find( ext => fs.existsSync(sslDir+fqdn+ext))
     if (!certExt) {
-      console.log(`Can not find SSL cert file ${fqdn} (${certExts.join(', ')} in ${sslDir})`)
-      console.log('ERROR: can not start server.')
+      console.log(port+':',`Can not find SSL cert file ${fqdn} (${certExts.join(', ')} in ${sslDir})`)
+      console.log(port+':','ERROR: can not start server.')
       exit()
     }
 

@@ -49,12 +49,11 @@ function debug(server, port, hostname) {
         process.exit(1);
         break;
       default:
-        console.log('???', error);
+        console.log('port:',port,'???', error);
         throw error;
     }
   });
 
-  console.log('--------------------------------------------------------------------------------');
   server.on("listening", () => {showListening(server, "Listening")} );
   server.on("ready",     () => {showListening(server, "Ready")} );
 }
