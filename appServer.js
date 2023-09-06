@@ -75,9 +75,12 @@ const serve = async (makeRouter, dotEnvPath) => {
 
     const router = makeRouter(argv)
 
+    if (logFile) {
+      log(__dirname+logFile)
+    }
 
     const httpsFlag = (argv.http) ? false : true
-    startHardenedServer(router, argv.port, logFile, argv.fqdn, argv.public, httpsFlag)
+    startHardenedServer(router, argv.port, argv.fqdn, argv.public, httpsFlag, false)
 
     return argv
 }
