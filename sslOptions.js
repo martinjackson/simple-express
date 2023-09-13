@@ -62,7 +62,7 @@ at https://www.ssllabs.com/ssltest/analyze.html
         honorCipherOrder: true
       }
 
-    console.log(port+':','sslOptions:', sslOptions);
+    // console.log(port+':','sslOptions:', sslOptions);
 
     const sslDirs = ['/opt/Certs/', 'ssl/']
     const sslDir = sslDirs.find(dir => fs.existsSync(dir+fqdn+'.key') )

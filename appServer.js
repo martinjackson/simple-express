@@ -80,21 +80,38 @@ const serve = async (makeRouter, dotEnvPath) => {
     }
 
     const httpsFlag = (argv.http) ? false : true
-    startHardenedServer(router, argv.port, argv.fqdn, argv.public, httpsFlag, false)
+    const config = {
+      port: argv.port,
+      fqdn:argv.fqdn,
+      publicDir: argv.public,
+      httpsFlag:httpsFlag,
+      requestCert: false
+    }
+    startHardenedServer(router, config)
 
     return argv
 }
 
 
 // -----------------------------------------------------------------------------------------------
-const startHardenedServer = async (router, port=3000, fqdn=null, publicDir='.', httpsFlag=true, requestCert=false) => {
+const startHardenedServer = async (router, config) => {
 
-  console.log(`${port}: fqdn: '${fqdn}'`, 'publicDir:', publicDir, 'httpsFlag:', httpsFlag, 'requestCert:', requestCert);
+  const defaultConfig = {
+    port:3000,
+    publicDir:'.',
+    httpsFlag:true,
+    requestCert:false,
+    sessionSecret: crypto.randomBytes(20).toString("hex"),      // every server restart -- all previous cookies are invalid
+  }
+
+  let {port, fqdn, publicDir, httpsFlag, requestCert, sessionSecret} = {...defaultConfig, ...config}
+
+  // console.log(`${port}: fqdn: '${fqdn}'`, 'publicDir:', publicDir, 'httpsFlag:', httpsFlag, 'requestCert:', requestCert);
 
   const protocol = (httpsFlag) ? 'https' : 'http'
   let hostname = (fqdn) ? fqdn : 'localhost'
 
-  console.log(`${port}: Starting ${protocol}://${hostname}:${port}`, process.pid,'\n\n')
+  console.log(`${port}: Starting ${protocol}://${hostname}:${port}`, process.pid)
 
   if (!fqdn) {
     try {
@@ -117,9 +134,14 @@ const startHardenedServer = async (router, port=3000, fqdn=null, publicDir='.', 
 
   // make req.sessionID and req.session.id available
   app.use(session({
-    secret: crypto.randomBytes(20).toString("hex"),      // every server restart -- all previous cookies are invalid
+    secret: sessionSecret,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {
+      httpOnly: false,         // allow js on client to see
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+    }
   }))
 
   const limit = '50mb'      // defailt is 1mb
@@ -131,10 +153,10 @@ const startHardenedServer = async (router, port=3000, fqdn=null, publicDir='.', 
 
   if (!requestCert) {
     app.use(cors({credentials: true}))
-    console.log(port+':','app.use(cors({credentials: true}))');
+    // console.log(port+':','app.use(cors({credentials: true}))');
   } else {
     // app.use(cors());        // original node-util port 4430 did not call cors at all
-    console.log(port+':','startHardenedServer() app.use(cors()) not called.');
+    // console.log(port+':','startHardenedServer() app.use(cors()) not called.');
   }
 
   app.use(cookieParser())
@@ -145,8 +167,9 @@ const startHardenedServer = async (router, port=3000, fqdn=null, publicDir='.', 
   const fpath = path.join(home, 'index.html')
   exists(fpath, (exists) => {
     if (exists) {
-      console.log(port+':','Found', fpath);
+      // console.log(port+':','Found', fpath);
     } else {
+      console.log(port+':','Creating missing', fpath);
       const page = `<!DOCTYPE html>
       <html lang="en">
       <head>
@@ -204,7 +227,7 @@ const startHardenedServer = async (router, port=3000, fqdn=null, publicDir='.', 
   const server = start(app, port, httpsFlag, fqdn, requestCert)
 
   // after the log redirect
-  console.log(port+':',`home: ${home}  unknown-urls: ${fpath}`)
+  // console.log(port+':',`home: ${home}  unknown-urls: ${fpath}`)
 
   return server
 }
