@@ -28,11 +28,11 @@ function logResponseTime(req, res, next) {
     const elapsedHrTime = process.hrtime(startHrTime);
     const elapsedTimeInMs = elapsedHrTime[0] * 1000 + elapsedHrTime[1] / 1e6;
 
-    const {user, id, ip} = getUserFromResponse(res)
+    const {user, ip} = getUserFromResponse(res)
 
-    console.log("%d: REQ-STAT: %s  %s : %fms %s %s %s", port, when, req.path, elapsedTimeInMs, id, user, ip);
+    console.log("%d: REQ-STAT: %s  %s : %fms %s %s", port, when, req.path, elapsedTimeInMs, user, ip);
 
-    responseQueue.push({when, path: req.path, elapsedTimeInMs, id, user, ip})
+    responseQueue.push({when, path: req.path, elapsedTimeInMs, user, ip})
     if (responseQueue.length > QUEUE_LIMIT) {
         responseQueue.shift()    // only keep the last 10,000 in memory -- parse the log files if you need more
     }

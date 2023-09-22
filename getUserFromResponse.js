@@ -13,18 +13,18 @@ function getUserFromResponse(response) {
   // req.path	    req.path contains the path part of the request URL.
   // req.route    req.route is the currently-matched route.
 
-  let id = '-'
+  const ip = req.ip
   let user = '-'
+
   if (req.cookies) {
-    id = req?.cookies["NCTR_REMOTE_ID"] || '-'
     user = req?.cookies["NCTR_REMOTE_USER"] || '-'
-  } else {
-    console.log('--- getUserFromResponse() no req.cookies ---');   // TODO: take this out
   }
 
-  const ip = req.ip
+  if (req?.session?.user?.name) {
+    user = req?.session?.user?.name
+  }
 
-  return {user, id, ip}
+  return {user, ip}
 
 }
 
