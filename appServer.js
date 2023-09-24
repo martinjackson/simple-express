@@ -16,6 +16,7 @@ const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
 const getFQDN = require('get-fqdn')
 const killable = require('killable')
+const compression = require('compression')
 
 const debug = require('./server-debug.js')
 const { log } = require('./server-log.js')
@@ -130,8 +131,6 @@ const startHardenedServer = async (router, config) => {
 
   const app = express()
 
-  app.use(logResponseTime)          // put each request's response time in the log file
-
   // make req.sessionID and req.session.id available
   app.use(session({
     secret: sessionSecret,
@@ -143,6 +142,11 @@ const startHardenedServer = async (router, config) => {
       maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
     }
   }))
+
+  app.use(cookieParser())
+
+  // cookies and session processing before loging the request and response times
+  app.use(logResponseTime)          // put each request's response time in the log file
 
   const limit = '50mb'      // defailt is 1mb
   app.use(express.json({limit}))                          // for parsing application/json
@@ -158,8 +162,6 @@ const startHardenedServer = async (router, config) => {
     // app.use(cors());        // original node-util port 4430 did not call cors at all
     // console.log(port+':','startHardenedServer() app.use(cors()) not called.');
   }
-
-  app.use(cookieParser())
 
   addMonitorRoutes(router)
   app.use(router)
@@ -192,6 +194,19 @@ const startHardenedServer = async (router, config) => {
       });
     }
   })
+
+  // http://expressjs.com/en/resources/middleware/compression.html
+  app.use(compression({ filter: shouldCompress }))   // added 2023-09-23 maj
+
+  function shouldCompress (req, res) {
+    if (req.headers['x-no-compression']) {
+      // don't compress responses with this request header
+      return false
+    }
+
+    // fallback to standard filter function
+    return compression.filter(req, res)
+  }
 
   app.use(express.static(home))     // serve up static content
   app.use(serveIndex(home))         // serve a directory view
