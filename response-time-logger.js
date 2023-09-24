@@ -1,5 +1,5 @@
 
-const { getUserFromRequest, getUserFromResponse } = require('./getUserFromResponse.js')
+const { getUserFromRequest } = require('./getUserFromRequest.js')
 
 // Taken from
 //   http://www.sheshbabu.com/posts/measuring-response-times-of-express-route-handlers/

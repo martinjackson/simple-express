@@ -1,11 +1,5 @@
 
 // ---------------------------------------------------------
-function getUserFromResponse(response) {
-
-  return getUserFromRequest(response.req)
-}
-
-// ---------------------------------------------------------
 function getUserFromRequest(req) {
 
   // https://www.pabbly.com/tutorials/express-js-request-response/
@@ -33,4 +27,4 @@ function getUserFromRequest(req) {
 
 }
 
-module.exports = {getUserFromRequest, getUserFromResponse}
+module.exports = { getUserFromRequest }
