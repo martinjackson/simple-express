@@ -19,7 +19,6 @@ const killable = require('killable')
 const compression = require('compression')
 
 const debug = require('./server-debug.js')
-const { log } = require('./server-log.js')
 const { shutdownSetup } = require('./server-shutdown.js')
 const { logResponseTime } = require("./response-time-logger")
 
@@ -52,17 +51,6 @@ const serve = async (makeRouter, dotEnvPath) => {
           description: 'Run with http protocol (default is https)',
           default: false
         })
-        .option('nolog', {
-          alias: 'n',
-          type: 'boolean',
-          description: 'do not output to log file'
-        })
-        .option('logFile', {
-          alias: 'l',
-          type: 'string',
-          description: 'name of log file',
-          default: path.join('.','logs','server.log')
-        })
         .option('public', {
           type: 'string',
           description: 'location of public directory',
@@ -72,13 +60,7 @@ const serve = async (makeRouter, dotEnvPath) => {
         .alias('help', 'h')
         .argv
 
-    const logFile = (argv.nolog) ? null : argv.logFile
-
     const router = makeRouter(argv)
-
-    if (logFile) {
-      log(__dirname+logFile)
-    }
 
     const httpsFlag = (argv.http) ? false : true
     const config = {
@@ -330,4 +312,4 @@ function responseFile(filePath, response) {
 
 
 
-module.exports = { serve, startHardenedServer, atomicSave, responseFile, log }
+module.exports = { serve, startHardenedServer, atomicSave, responseFile }

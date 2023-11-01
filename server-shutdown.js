@@ -3,8 +3,6 @@
 // Thank you    Luis Gonzalez    https://stackoverflow.com/users/6673573/luis-gonzalez
 // Thank you    Emil Condrea     https://stackoverflow.com/users/832363/emil-condrea
 
-const { logShutdown } = require('./server-log.js');
-
 let exitAlreadyBeenHere = false
 
 function shutdownSetup() {
@@ -23,8 +21,6 @@ function shutdownSetup() {
         if (exitCode || exitCode === 0) {
           console.log('exitCode:', exitCode)
         }
-
-        logShutdown()
 
         if (options.exit) {
           exitAlreadyBeenHere = true
