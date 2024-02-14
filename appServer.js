@@ -9,7 +9,7 @@ const helmet = require('helmet')
 const http  = require('http')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
-const serveIndex = require('serve-index')
+// const serveIndex = require('serve-index')
 const session = require('express-session')
 const dotenv = require('dotenv')
 const yargs = require('yargs/yargs')
@@ -191,7 +191,13 @@ const startHardenedServer = async (router, config) => {
   }
 
   app.use(express.static(home))     // serve up static content
-  app.use(serveIndex(home))         // serve a directory view
+
+  // app.use(serveIndex(home))     // serve a directory view   -- this echos back when directory not found
+                                   //  and allows XSS
+/*
+https:/somehost:3555/dist/main.js/%3c%73%43%72%49%70%54%3e%61%6c%65%72%74%28%35%32%31%36%38%29%3c%2f%73%43%72%49%70%54%3e
+aka. https:/somehost:3555/dist/main.js/<sCrIpT>alert(36262)</sCrIpT>
+*/
 
   const errorHandler = (error, request, response, _next) => {
     // Error handling middleware functionality
