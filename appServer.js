@@ -199,6 +199,8 @@ https:/somehost:3555/dist/main.js/%3c%73%43%72%49%70%54%3e%61%6c%65%72%74%28%35%
 aka. https:/somehost:3555/dist/main.js/<sCrIpT>alert(36262)</sCrIpT>
 */
 
+   // removed       ${error.message}  as text after the H1 --- allows  cross site scripting XSS
+
   const errorHandler = (error, request, response, _next) => {
     // Error handling middleware functionality
     console.log(port+':', `error ${error.message}`, error) // log the error
@@ -214,7 +216,7 @@ aka. https:/somehost:3555/dist/main.js/<sCrIpT>alert(36262)</sCrIpT>
     </head>
     <body>
       <h1>Something went wrong</h1>
-      ${error.message}
+      Code: ${error.status}
     </body>
     </html>
     `
