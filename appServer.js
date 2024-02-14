@@ -190,7 +190,7 @@ const startHardenedServer = async (router, config) => {
     return compression.filter(req, res)
   }
 
-  app.use(express.static(home))     // serve up static content
+  app.use(express.static(home, {fallthrough: false}))     // serve up static content
 
   // app.use(serveIndex(home))     // serve a directory view   -- this echos back when directory not found
                                    //  and allows XSS
