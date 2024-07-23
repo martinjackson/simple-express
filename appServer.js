@@ -40,15 +40,15 @@ const serve = async (makeRouter, dotEnvPath) => {
           alias: 'p',
           type: 'number',
           description: 'port to bind on',
-          default: process.env.API_PORT
+          default: 80
         })
         .option('fqdn', {
           description: 'fully qualified domain name',
           default: null
         })
-        .option('http', {
+        .option('https', {
           type: 'boolean',
-          description: 'Run with http protocol (default is https)',
+          description: 'Run with http protocol (default is http)',
           default: false
         })
         .option('public', {
@@ -62,7 +62,7 @@ const serve = async (makeRouter, dotEnvPath) => {
 
     const router = makeRouter(argv)
 
-    const httpsFlag = (argv.http) ? false : true
+    const httpsFlag = (argv.https) ? true: false
     const config = {
       port: argv.port,
       fqdn:argv.fqdn,
@@ -80,9 +80,9 @@ const serve = async (makeRouter, dotEnvPath) => {
 const startHardenedServer = async (router, config) => {
 
   const defaultConfig = {
-    port:3000,
+    port:80,
     publicDir:'.',
-    httpsFlag:true,
+    httpsFlag:false,
     requestCert:false,
     sessionSecret: crypto.randomBytes(20).toString("hex"),      // every server restart -- all previous cookies are invalid
   }
