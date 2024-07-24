@@ -1,4 +1,6 @@
 
+// cSpell: ignore killable resave
+
 const fs = require('fs')
 const { exists } = require('fs')
 const path = require('path')
@@ -65,9 +67,9 @@ const serve = async (makeRouter, dotEnvPath) => {
     const httpsFlag = (argv.https) ? true: false
     const config = {
       port: argv.port,
-      fqdn:argv.fqdn,
+      fqdn: argv.fqdn,
       publicDir: argv.public,
-      httpsFlag:httpsFlag,
+      httpsFlag: httpsFlag,
       requestCert: false
     }
     startHardenedServer(router, config)
@@ -77,7 +79,7 @@ const serve = async (makeRouter, dotEnvPath) => {
 
 
 // -----------------------------------------------------------------------------------------------
-const startHardenedServer = async (router, config) => {
+export const startHardenedServer = async (router, config) => {
 
   const defaultConfig = {
     port:80,
@@ -127,10 +129,10 @@ const startHardenedServer = async (router, config) => {
 
   app.use(cookieParser())
 
-  // cookies and session processing before loging the request and response times
+  // cookies and session processing before logging the request and response times
   app.use(logResponseTime)          // put each request's response time in the log file
 
-  const limit = '50mb'      // defailt is 1mb
+  const limit = '50mb'      // default is 1mb
   app.use(express.json({limit}))                          // for parsing application/json
   app.use(express.urlencoded({ limit, extended: true }))  // for parsing application/x-www-form-urlencoded
 
@@ -148,12 +150,12 @@ const startHardenedServer = async (router, config) => {
   addMonitorRoutes(router)
   app.use(router)
 
-  const fpath = path.join(home, 'index.html')
-  exists(fpath, (exists) => {
+  const fPath = path.join(home, 'index.html')
+  exists(fPath, (exists) => {
     if (exists) {
-      // console.log(port+':','Found', fpath);
+      // console.log(port+':','Found', fPath);
     } else {
-      console.log(port+':','Creating missing', fpath);
+      console.log(port+':','Creating missing', fPath);
       const page = `<!DOCTYPE html>
       <html lang="en">
       <head>
@@ -167,11 +169,11 @@ const startHardenedServer = async (router, config) => {
       </body>
       </html>
       `
-      fs.writeFile(fpath, page, err => {
+      fs.writeFile(fPath, page, err => {
         if (err) {
-          console.error('Error writing missing', fpath, 'error:', err);
+          console.error('Error writing missing', fPath, 'error:', err);
         } else {
-          console.log(port+':', 'Created missing', fpath, 'w/o error.');
+          console.log(port+':', 'Created missing', fPath, 'w/o error.');
         }
       });
     }
@@ -195,8 +197,8 @@ const startHardenedServer = async (router, config) => {
   // app.use(serveIndex(home))     // serve a directory view   -- this echos back when directory not found
                                    //  and allows XSS
 /*
-https:/somehost:3555/dist/main.js/%3c%73%43%72%49%70%54%3e%61%6c%65%72%74%28%35%32%31%36%38%29%3c%2f%73%43%72%49%70%54%3e
-aka. https:/somehost:3555/dist/main.js/<sCrIpT>alert(36262)</sCrIpT>
+https:/someHost:3555/dist/main.js/%3c%73%43%72%49%70%54%3e%61%6c%65%72%74%28%35%32%31%36%38%29%3c%2f%73%43%72%49%70%54%3e
+aka. https:/someHost:3555/dist/main.js/<sCrIpT>alert(36262)</sCrIpT>
 */
 
    // removed       ${error.message}  as text after the H1 --- allows  cross site scripting XSS
@@ -232,7 +234,7 @@ aka. https:/somehost:3555/dist/main.js/<sCrIpT>alert(36262)</sCrIpT>
   const server = start(app, port, httpsFlag, fqdn, requestCert)
 
   // after the log redirect
-  // console.log(port+':',`home: ${home}  unknown-urls: ${fpath}`)
+  // console.log(port+':',`home: ${home}  unknown-urls: ${fPath}`)
 
   return server
 }
@@ -283,10 +285,10 @@ function start(app, port, httpsFlag, fqdn, requestCert=false) {
 }
 
 // -------------------------------------------------------------------------------------------------
-function atomicSave(fname, obj, id) {
+function atomicSave(fileName, obj, id) {
   try {
-    const temp = `${fname}-temp-${id}`
-    const dest = `${fname}`
+    const temp = `${fileName}-temp-${id}`
+    const dest = `${fileName}`
     fs.writeFileSync(temp, JSON.stringify(obj, null, 2))
     fs.copyFile(temp,dest, (err) => {
       if (err) throw err
@@ -298,7 +300,7 @@ function atomicSave(fname, obj, id) {
   }
 }
 
-// Where fileName is name of the file and response is Node.js Reponse.
+// Where fileName is name of the file and response is Node.js Response.
 // -------------------------------------------------------------------------------------------------
 function responseFile(filePath, response) {
 
