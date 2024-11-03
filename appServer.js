@@ -82,7 +82,7 @@ const serve = async (makeRouter, dotEnvPath) => {
 export const startHardenedServer = async (router, config) => {
 
   const defaultConfig = {
-    port:80,
+    port:8000,
     publicDir:'.',
     httpsFlag:false,
     requestCert:false,
