@@ -72,7 +72,7 @@ at https://www.ssllabs.com/ssltest/analyze.html
       exit()
     }
 
-    const certExts = ['.pem', '.cer', '.crt', '.cert']
+    const certExts = ['.cer', '.crt', '.cert']
     const certExt = certExts.find( ext => fs.existsSync(sslDir+fqdn+ext))
     if (!certExt) {
       console.log(port+':',`Can not find SSL cert file ${fqdn} (${certExts.join(', ')} in ${sslDir})`)
