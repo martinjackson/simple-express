@@ -2,12 +2,18 @@
   "name": "@martinjackson/simple-express",
   "version": "1.0.60",
   "description": "",
-  "main": "appServer.js",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "npm start",
     "lint": "eslint --ext .js --ignore-path .gitignore .",
     "version": "echo  $npm_package_version",
-    "getName": "echo  $npm_package_name"
+    "getName": "echo  $npm_package_name",
+    "build": "npm run esbuild && npm run pack",
+    "esbuild": "rm -rf dist && node esbuild.mjs",
+    "pack": "npm pack --silent"
   },
   "repository": {
     "type": "https",
@@ -32,6 +38,11 @@
     "yargs": "^17.1.1"
   },
   "devDependencies": {
+    "esbuild": "^0.25.8",
+    "esbuild-node-externals": "^1.18.0",
+    "esbuild-plugin-inline-image": "^0.0.9",
+    "esbuild-plugin-markdown": "^0.0.3",
+    "esbuild-postcss": "^0.0.4",
     "eslint": "^8.44.0"
   }
 }
