@@ -28,7 +28,7 @@ const addMonitorRoutes = require('./apiMonitorRoutes.js')
 const {genSSLOptions} = require('./sslOptions.js')
 
 // -----------------------------------------------------------------------------------------------
-const serve = async (makeRouter, dotEnvPath) => {
+export const serve = async (makeRouter, dotEnvPath) => {
 
     console.log('dotenv: ', dotEnvPath)
     const result = dotenv.config({ path: dotEnvPath })
